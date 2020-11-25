@@ -15,7 +15,6 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             'pk',
-            # 'author',
             'author_username',
             'message',
             'created_at',

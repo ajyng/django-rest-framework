@@ -2,7 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from .serializers import PostSerializer
 from .models import Post
 
@@ -18,17 +18,32 @@ from .models import Post
 
 # public_post_list = PublicPostListAPIView.as_view()
 
-@api_view(['GET'])
-def public_post_list(request):
-    qs = Post.objects.filter(is_public=True)
-    serializer = PostSerializer(qs, many=True)
-    return Response(serializer.data)
+# @api_view(['GET']) # 함수기반뷰 구현
+# def public_post_list(request):
+#     qs = Post.objects.filter(is_public=True)
+#     serializer = PostSerializer(qs, many=True)
+#     return Response(serializer.data)
+
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    def dispatch(self, request, *args, **kwargs):
-        print("request.body: ",request.body) # print 비추천, logger 추천!
-        print("request.POST: ",request.POST)
-        return super().dispatch(request, *args, **kwargs)
+    @action(detail=False, methods=['GET'])
+    def public(self, request):
+        qs = self.get_queryset().filter(is_public=True)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['PATCH'])
+    def set_public(self, request, pk):
+        instance = self.get_object()
+        instance.is_public = True
+        instance.save()
+        serializer = self.get_serializer(instance )
+        return Response(serializer.data)
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     print("request.body: ",request.body) # print 비추천, logger 추천!
+    #     print("request.POST: ",request.POST)
+    #     return super().dispatch(request, *args, **kwargs)
