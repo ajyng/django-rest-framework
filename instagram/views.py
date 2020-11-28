@@ -30,6 +30,12 @@ from .models import Post
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    # authentication_classes
+
+    def perform_create(self, serializer):
+        author = self.request.user
+        ip = self.request.META['REMOTE_ADDR']
+        serializer.save(author=author, ip=ip)
 
     @action(detail=False, methods=['GET'])
     def public(self, request):
@@ -44,11 +50,6 @@ class PostViewSet(ModelViewSet):
         instance.save()
         serializer = self.get_serializer(instance )
         return Response(serializer.data)
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     print("request.body: ",request.body) # print 비추천, logger 추천!
-    #     print("request.POST: ",request.POST)
-    #     return super().dispatch(request, *args, **kwargs)
 
 class PostDetailAPIView(RetrieveAPIView):
     queryset = Post.objects.all()
