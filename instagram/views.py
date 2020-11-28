@@ -6,33 +6,20 @@ from rest_framework.decorators import api_view, action
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .serializers import PostSerializer
 from .models import Post
 from .permissions import IsAuthorOrReadonly
-
-# class PublicPostListAPIView(generics.ListAPIView):
-#     queryset = Post.objects.filter(is_public=True)
-#     serializer_class = PostSerializer
-
-# class PublicPostListAPIView(APIView):
-#     def get(self, request):
-#         qs = Post.objects.filter(is_public=True)
-#         serializer = PostSerializer(qs, many=True)
-#         return Response(serializer.data)
-
-# public_post_list = PublicPostListAPIView.as_view()
-
-# @api_view(['GET']) # 함수기반뷰 구현
-# def public_post_list(request):
-#     qs = Post.objects.filter(is_public=True)
-#     serializer = PostSerializer(qs, many=True)
-#     return Response(serializer.data)
-
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadonly]
+
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['message']
+    ordering_fields = ['id']
+    ordering = ['id']
 
     def perform_create(self, serializer):
         author = self.request.user
