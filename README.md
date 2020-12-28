@@ -1,2 +1,2 @@
 # django-rest-framework
-DJango Rest API 연습
+Django Rest API 연습
